@@ -1,21 +1,274 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Heart shooting | codexpert</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For My LOVE ❤️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+            height: 100vh;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- Game Elements --- */
+        #game-area {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 20;
+        }
+
+        .instructions {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.8);
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            to { transform: scale(1.05); color: #ff4d6d; }
+        }
+
+        /* Moving Hoop */
+        #hoop-container {
+            position: absolute;
+            top: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: moveHoop 3s linear infinite alternate;
+        }
+
+        @keyframes moveHoop {
+            0% { left: 20%; }
+            100% { left: 80%; }
+        }
+
+        #backboard {
+            width: 100px;
+            height: 70px;
+            border: 4px solid white;
+            border-radius: 5px;
+            background: rgba(255,255,255,0.1);
+            position: relative;
+        }
+        
+        #backboard::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 30px;
+            border: 3px solid white;
+        }
+
+        #ring {
+            width: 60px;
+            height: 10px;
+            background: #ff6b00;
+            border-radius: 10px;
+            margin-top: -5px;
+            z-index: 2;
+            box-shadow: 0 5px 10px rgba(255, 107, 0, 0.5);
+        }
+
+        /* Basketball */
+        #ball {
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 60px;
+            cursor: pointer;
+            z-index: 3;
+            transition: all 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* When the ball is shot */
+        .shooting {
+            bottom: 80% !important; /* Goes up to the ring level */
+            font-size: 30px !important; /* Appears smaller as it goes further */
+            transform: translateX(-50%) rotate(360deg) !important;
+        }
+
+        /* --- Romantic Elements (Hidden Initially) --- */
+        #romantic-area {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 2s ease-in;
+        }
+
+        h1 {
+            font-family: 'Dancing Script', cursive;
+            font-size: 4.5rem;
+            color: #ff4d6d;
+            text-shadow: 0 0 20px rgba(255, 77, 109, 0.8);
+            margin-bottom: 20px;
+        }
+
+        .nice-shot {
+            font-family: 'Dancing Script', cursive;
+            font-size: 3.5rem;
+            color: #00ff88;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.8);
+            margin-bottom: 10px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 1.5s ease-in-out;
+        }
+
+        .nice-shot.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .message {
+            font-size: 1.3rem;
+            text-align: center;
+            max-width: 85%;
+            line-height: 1.8;
+        }
+
+        .heart {
+            position: absolute;
+            color: #ff4d6d;
+            animation: floatUp linear infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0.5) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.8; }
+            100% { transform: translateY(-10vh) scale(1.5) rotate(360deg); opacity: 0; }
+        }
+    </style>
 </head>
 <body>
-  <canvas id="canvas"></canvas>
-  <div id="rotateNotice" style="display:none;">
-    <div class="overlay">
-      <p>Please rotate your screen horizontally for the best viewing experience. 🌟</p>
+
+    <div id="game-area">
+        <p class="instructions" id="instructions">Tap the ball to shoot when the ring is in the middle! 🏀</p>
+        
+        <div id="hoop-container">
+            <div id="backboard"></div>
+            <div id="ring"></div>
+        </div>
+        
+        <div id="ball" onclick="shootBall()">🏀</div>
     </div>
-  </div>
 
-  <img id="bear" src="https://i.pinimg.com/originals/e5/c5/4c/e5c54cd43fd75a7ec5b7cf0f65838ec3.gif" alt="Bear" />
+    <div id="romantic-area">
+        <div class="nice-shot" id="nice-shot-text">Nice Shot Cutiee ❤️</div>
+        <h1 id="name">Abhishikta... ✨</h1>
+        <div class="message" id="text-container"></div>
+    </div>
 
-  <script src="script.js"></script>
-  
+    <script>
+        let isShooting = false;
+        let gameWon = false;
+
+        function shootBall() {
+            if (isShooting || gameWon) return;
+            isShooting = true;
+
+            const ball = document.getElementById('ball');
+            const ring = document.getElementById('ring');
+            
+            ball.classList.add('shooting'); // Starts the fly animation
+
+            // Wait for the ball to reach the top
+            setTimeout(() => {
+                let ballRect = ball.getBoundingClientRect();
+                let ringRect = ring.getBoundingClientRect();
+
+                // Simple collision detection (Checking if ball is somewhat aligned with the ring horizontally)
+                if (ballRect.left > ringRect.left - 30 && ballRect.right < ringRect.right + 30) {
+                    // Win Condition!
+                    gameWon = true;
+                    winSequence();
+                } else {
+                    // Missed! Reset the ball
+                    ball.classList.remove('shooting');
+                    setTimeout(() => { isShooting = false; }, 100);
+                }
+            }, 700); // 700ms matches the CSS transition time of the ball
+        }
+
+        function winSequence() {
+            // Stop the hoop
+            document.getElementById('hoop-container').style.animationPlayState = 'paused';
+            
+            // Fade out game elements
+            document.getElementById('instructions').style.opacity = '0';
+            
+            // Show romantic area
+            const romanticArea = document.getElementById('romantic-area');
+            romanticArea.style.opacity = '1';
+
+            // Show "Nice Shot Cutiee" with fade in
+            setTimeout(() => {
+                document.getElementById('nice-shot-text').classList.add('show');
+            }, 500);
+
+            // Hide the game entirely and start typing message after 3 seconds
+            setTimeout(() => {
+                document.getElementById('game-area').style.display = 'none';
+                startRomance();
+            }, 3000);
+        }
+
+        function startRomance() {
+            // Start the typing effect
+            const text = "Pata hai? Jaise tune ye perfect shot mara, waise hi tune mere dil par perfect nishana lagaya hai. You are my everything, LOVE. I love you! ❤️";
+            let index = 0;
+            
+            function typeWriter() {
+                if (index < text.length) {
+                    document.getElementById("text-container").innerHTML += text.charAt(index);
+                    index++;
+                    setTimeout(typeWriter, 60);
+                }
+            }
+            typeWriter();
+
+            // Start Floating Hearts
+            setInterval(() => {
+                const heart = document.createElement("div");
+                heart.innerHTML = "❤️";
+                heart.classList.add("heart");
+                heart.style.left = Math.random() * 100 + "vw";
+                heart.style.fontSize = (Math.random() * 20 + 15) + "px";
+                heart.style.animationDuration = (Math.random() * 4 + 4) + "s";
+                document.getElementById("romantic-area").appendChild(heart);
+                
+                setTimeout(() => heart.remove(), 8000);
+            }, 300);
+        }
+    </script>
 </body>
 </html>
